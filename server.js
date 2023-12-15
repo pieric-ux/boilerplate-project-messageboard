@@ -8,7 +8,27 @@ const apiRoutes         = require('./routes/api.js');
 const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
+const connectDB = require('./db/connections.js');
+const helmet = require('helmet');
+
 const app = express();
+
+connectDB();
+
+app.disable('x-powered-by');
+
+app.use(
+  helmet({
+    xDnsPrefetchControl: { 
+      allow: false 
+    },
+    referrerPolicy: {
+      policy: "same-origin",
+    },
+    xDownloadOptions: false,
+    xFrameOptions: false,
+  })
+);
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
@@ -47,9 +67,9 @@ app.use(function(req, res, next) {
 });
 
 //Start our server and tests!
-const listener = app.listen(process.env.PORT || 3000, function () {
+const listener = app.listen(process.env['PORT'] || 3000, function () {
   console.log('Your app is listening on port ' + listener.address().port);
-  if(process.env.NODE_ENV==='test') {
+  if(process.env['NODE_ENV']==='test') {
     console.log('Running Tests...');
     setTimeout(function () {
       try {
